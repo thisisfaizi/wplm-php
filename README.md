@@ -1,14 +1,33 @@
-# WPLM PHP SDK
+<div align="center">
 
-Official PHP client for [WP License Manager (WPLM)](https://github.com/wplm), with a
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=4,8,15&height=160&section=header&text=wplm-php&fontSize=52&fontAlignY=42&animation=fadeIn&fontColor=ffffff" />
+
+### WP License Manager — PHP SDK
+
+[![Packagist](https://img.shields.io/packagist/v/wplm/sdk?style=for-the-badge&logo=packagist&logoColor=white&color=F28D1A)](https://packagist.org/packages/wplm/sdk)
+[![CI](https://img.shields.io/github/actions/workflow/status/wplm/wplm-php/ci.yaml?style=for-the-badge&label=CI&logo=github-actions&logoColor=white)](https://github.com/wplm/wplm-php/actions/workflows/ci.yaml)
+[![Coverage](https://img.shields.io/codecov/c/github/wplm/wplm-php?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/wplm/wplm-php)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+
+<p>Offline-first Ed25519 license validation for PHP apps and WordPress plugins,<br>
+backed by a self-hosted <a href="https://github.com/wplm/wp-license-manager">WP License Manager</a> server.</p>
+
+</div>
+
+---
+
+Official PHP client for **[WP License Manager (WPLM)](https://github.com/wplm/wp-license-manager)**, with a
 turnkey WordPress licensing + auto-update helper.
 
-- Online **validate / activate / deactivate / heartbeat** against the `wplm/v1` REST API.
-- **Offline verification** of Ed25519-signed license payloads and the CRL — works with no network.
-- Offline **expiry enforcement** with a monotonic time-floor (resists clock rollback).
-- Real **device metadata** (name / host / platform) sent on activation.
-- Pluggable **transport**, **storage**, **fingerprint**, and **device-info** providers.
-- WordPress helper: drop-in **license settings page** + license-gated **auto-update**.
+- ✅ Online `validate` / `activate` / `deactivate` / `heartbeat`
+- 🔏 **Offline** Ed25519 signature verification (`ext-sodium`, no network needed)
+- 🛡️ Signed CRL check (reject revoked keys offline)
+- 🔌 Pluggable transport, storage, fingerprint, and device-info providers
+- 🔄 Offline expiry enforcement with monotonic time-floor (resists clock rollback)
+- 🖥️ WordPress helper: drop-in **license settings page** + license-gated **auto-update**
+
+---
 
 ## Install
 
@@ -18,7 +37,9 @@ composer require wplm/sdk
 
 Requires PHP 8.0+ with `ext-sodium`, `ext-json`, `ext-curl`.
 
-## Quick start (any PHP app)
+---
+
+## Quick Start (Any PHP App)
 
 ```php
 use WPLM\Client\Client;
@@ -30,19 +51,22 @@ $wplm = new Client(
     publicKeyBase64: 'BASE64_ED25519_PUBLIC_KEY', // bundle for offline verification
 );
 
-$wplm->activate();                       // bind this device (sends real device info)
-$result = $wplm->validate(offlineOk: true); // online, falling back to a cached signed payload
+$wplm->activate();                          // bind this device (sends real device info)
+$result = $wplm->validate(offlineOk: true); // online, falling back to a cached payload
 if (! $result->valid) {
-    // $result->code: expired | revoked | suspended | ...
+    // $result->code: 'expired' | 'revoked' | 'suspended' | ...
 }
 ```
 
-## WordPress plugin (settings + gated auto-update)
+---
+
+## WordPress Plugin (Settings Page + Gated Auto-Update)
 
 ```php
 use WPLM\Client\WordPress\LicenseSettings;
 use WPLM\Client\WordPress\PluginUpdater;
 
+// Admin → Settings → My Plugin License (enter key, activate, deactivate)
 $license = new LicenseSettings(
     baseUrl: 'https://license.vendor.com',
     productId: 42,
@@ -51,6 +75,7 @@ $license = new LicenseSettings(
 );
 $license->register();
 
+// Gate plugin updates through WPLM's Releases API
 (new PluginUpdater(
     baseUrl: 'https://license.vendor.com',
     productId: 42,
@@ -61,14 +86,27 @@ $license->register();
 ))->register();
 
 if (! $license->isLicenseActive()) {
-    // gate premium features
+    // disable premium features
 }
 ```
 
+---
+
+## Subscription Renewal
+
+Renewals are handled through **WooCommerce My Account → Subscriptions → Renew**.
+No SDK code is needed: after the customer pays, the server extends `expires_at`
+and re-signs the offline payload. The next `validate()` call returns the updated
+expiry and refreshes the local cache automatically.
+
+---
+
 ## Security
 
-Only the **public key**, product id, and server URL are ever shipped — never a private
-signing key or any server secret. See [SECURITY.md](SECURITY.md).
+Only the **public key**, product id, and server URL are ever shipped — never a
+private signing key or any server secret. See [SECURITY.md](SECURITY.md).
+
+---
 
 ## Development
 
@@ -79,6 +117,22 @@ composer analyse   # phpstan (max)
 composer lint      # phpcs (PSR-12)
 ```
 
-## License
+---
 
-MIT — see [LICENSE](LICENSE).
+## Links
+
+- [WP License Manager (server plugin)](https://github.com/wplm/wp-license-manager)
+- [Dart / Flutter SDK](https://github.com/wplm/wplm-dart)
+- [Python SDK](https://github.com/wplm/wplm-python)
+- [JavaScript / TypeScript SDK](https://github.com/wplm/wplm-js)
+- [OpenAPI 3.1 spec](https://github.com/wplm/wplm-openapi)
+
+---
+
+<div align="center">
+
+MIT License · Part of the [WP License Manager](https://github.com/wplm/wp-license-manager) ecosystem
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=4,8,15&height=80&section=footer" />
+
+</div>
