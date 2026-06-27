@@ -49,6 +49,7 @@ class WplmException extends Exception
             'license_not_active' => WplmNotActiveException::class,
             'machine_not_found' => WplmMachineNotFoundException::class,
             'machine_inactive' => WplmMachineNotFoundException::class,
+            'product_mismatch' => WplmProductMismatchException::class,
         ];
         $class = $map[$code] ?? WplmApiException::class;
         /** @var WplmException $instance */
@@ -99,6 +100,17 @@ class WplmNotActiveException extends WplmException
 
 /** The device/machine was not found or is inactive. */
 class WplmMachineNotFoundException extends WplmException
+{
+}
+
+/**
+ * The license is bound to a different product than this client expects.
+ *
+ * Raised when the signed payload's `pid` does not match the configured product
+ * id. Enforced online and offline from the cryptographically signed payload, so
+ * a key issued for product A cannot run in product B's app.
+ */
+class WplmProductMismatchException extends WplmException
 {
 }
 

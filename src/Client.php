@@ -12,6 +12,7 @@ use WPLM\Client\Exceptions\WplmApiException;
 use WPLM\Client\Exceptions\WplmConfigException;
 use WPLM\Client\Exceptions\WplmException;
 use WPLM\Client\Exceptions\WplmNetworkException;
+use WPLM\Client\Exceptions\WplmProductMismatchException;
 use WPLM\Client\Exceptions\WplmSignatureInvalidException;
 use WPLM\Client\Fingerprint\FingerprintProvider;
 use WPLM\Client\Fingerprint\PersistedUuidFingerprintProvider;
@@ -75,6 +76,19 @@ final class Client
             $result = ValidationResult::fromArray($data);
             if ($result->signedPayload !== null && $result->signedPayload !== '') {
                 $this->store->write(self::K_SIGNED, $result->signedPayload);
+            }
+            // Enforce product binding from the *signed* payload (not the unsigned
+            // license JSON), so a key issued for another product is rejected even
+            // online. No-op when productId is null.
+            if ($result->valid && $this->productId !== null) {
+                if ($result->signedPayload === null || $result->signedPayload === '') {
+                    throw new WplmProductMismatchException(
+                        'License is valid but carries no signed payload to verify product '
+                        . 'binding for product ' . $this->productId . '.',
+                        'product_mismatch'
+                    );
+                }
+                $this->enforceProductId($this->verifyWithKeyRefresh($result->signedPayload));
             }
             // A successful online call is a trusted clock reading — advance the
             // monotonic time floor so a later offline rollback is detectable.
@@ -212,6 +226,53 @@ final class Client
 
     // -------------------------------------------------------------- offline
 
+    /**
+     * Verify a token online, recovering from server keypair rotation: if the
+     * cached public key fails verification, drop it, re-fetch /public-key once,
+     * and retry. Self-heals clients that cached an old key before the vendor
+     * rotated the signing keypair.
+     *
+     * @return array<string,mixed>
+     */
+    private function verifyWithKeyRefresh(string $token): array
+    {
+        try {
+            return $this->getVerifier()->verify($token);
+        } catch (WplmSignatureInvalidException $e) {
+            // Cached key may be stale — invalidate and re-fetch once.
+            $this->verifier = null;
+            $this->store->delete(self::K_PUBKEY);
+            return $this->getVerifier()->verify($token);
+        }
+    }
+
+    /**
+     * Reject a signed payload whose product binding does not match productId.
+     *
+     * No-op when productId is null (the app opted out of product binding). When
+     * set, the payload's signed `pid` must equal it; a missing or different
+     * `pid` throws. Enforced from the signed payload so the rule holds online
+     * and offline alike.
+     *
+     * @param array<string,mixed> $payload
+     */
+    private function enforceProductId(array $payload): void
+    {
+        $expected = $this->productId;
+        if ($expected === null) {
+            return;
+        }
+        $pid = $payload['pid'] ?? null;
+        $actual = (is_int($pid) || is_float($pid)) ? (int) $pid : null;
+        if ($actual !== $expected) {
+            throw new WplmProductMismatchException(
+                'License is bound to product ' . ($actual ?? 'none')
+                . ', but this app is configured for product ' . $expected . '.',
+                'product_mismatch'
+            );
+        }
+    }
+
     private function validateOffline(string $key): ?ValidationResult
     {
         $token = $this->store->read(self::K_SIGNED);
@@ -229,6 +290,10 @@ final class Client
         } catch (WplmSignatureInvalidException $e) {
             return new ValidationResult(false, 'signature_invalid', null, null, false, true);
         }
+
+        // Product binding is enforced offline too: the signed `pid` must match
+        // the configured productId. No-op when productId is null.
+        $this->enforceProductId($payload);
 
         if (!SignatureVerifier::isWithinClockDrift($payload, $this->maxClockDrift)) {
             return new ValidationResult(false, 'clock_drift', null, null, false, true);
