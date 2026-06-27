@@ -5,19 +5,19 @@
 ### WP License Manager — PHP SDK
 
 [![Packagist](https://img.shields.io/packagist/v/wplm/sdk?style=for-the-badge&logo=packagist&logoColor=white&color=F28D1A)](https://packagist.org/packages/wplm/sdk)
-[![CI](https://img.shields.io/github/actions/workflow/status/wplm/wplm-php/ci.yaml?style=for-the-badge&label=CI&logo=github-actions&logoColor=white)](https://github.com/wplm/wplm-php/actions/workflows/ci.yaml)
+[![CI](https://img.shields.io/github/actions/workflow/status/wplm/wplm-php/ci.yaml?style=for-the-badge&label=CI&logo=github-actions&logoColor=white)](https://github.com/thisisfaizi/wplm-php/actions/workflows/ci.yaml)
 [![Coverage](https://img.shields.io/codecov/c/github/wplm/wplm-php?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/wplm/wplm-php)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
 
 <p>Offline-first Ed25519 license validation for PHP apps and WordPress plugins,<br>
-backed by a self-hosted <a href="https://github.com/wplm/wp-license-manager">WP License Manager</a> server.</p>
+backed by a self-hosted <a href="https://github.com/thisisfaizi/wp-license-manager">WP License Manager</a> server.</p>
 
 </div>
 
 ---
 
-Official PHP client for **[WP License Manager (WPLM)](https://github.com/wplm/wp-license-manager)**, with a
+Official PHP client for **[WP License Manager (WPLM)](https://github.com/thisisfaizi/wp-license-manager)**, with a
 turnkey WordPress licensing + auto-update helper.
 
 - ✅ Online `validate` / `activate` / `deactivate` / `heartbeat`
@@ -121,17 +121,17 @@ composer lint      # phpcs (PSR-12)
 
 ## Links
 
-- [WP License Manager (server plugin)](https://github.com/wplm/wp-license-manager)
-- [Dart / Flutter SDK](https://github.com/wplm/wplm-dart)
-- [Python SDK](https://github.com/wplm/wplm-python)
-- [JavaScript / TypeScript SDK](https://github.com/wplm/wplm-js)
-- [OpenAPI 3.1 spec](https://github.com/wplm/wplm-openapi)
+- [WP License Manager (server plugin)](https://github.com/thisisfaizi/wp-license-manager)
+- [Dart / Flutter SDK](https://github.com/thisisfaizi/wplm-dart)
+- [Python SDK](https://github.com/thisisfaizi/wplm-python)
+- [JavaScript / TypeScript SDK](https://github.com/thisisfaizi/wplm-js)
+- [OpenAPI 3.1 spec](https://github.com/thisisfaizi/wplm-openapi)
 
 ---
 
 <div align="center">
 
-MIT License · Part of the [WP License Manager](https://github.com/wplm/wp-license-manager) ecosystem
+MIT License · Part of the [WP License Manager](https://github.com/thisisfaizi/wp-license-manager) ecosystem
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=4,8,15&height=80&section=footer" />
 
